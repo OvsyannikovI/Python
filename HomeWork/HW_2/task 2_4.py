@@ -16,6 +16,9 @@ my_list = []
 rez = 1
 for i in range(-n3, n3+1):
     my_list.append(i)
-rez =my_list[n1-1] * my_list[n2-1]
 print("-> ", my_list)
-print("-> ", rez)
+try:
+    rez =my_list[n1-1] * my_list[n2-1]
+    print("-> ", rez)
+except:
+    print("Позиции вне границ списка")
