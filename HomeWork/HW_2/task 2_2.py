@@ -4,7 +4,7 @@
 # - 4 -> [1, 2, 6, 24]
 # - 6 -> [1, 2, 6, 24, 120, 720]
 
-num = int(input())
+num = int(input("Введите число N"))
 rez = 1
 for i in range(1,num+1):
     rez *= i

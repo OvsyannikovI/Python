@@ -4,7 +4,7 @@
 # - 0.67 -> 13
 # - 198.45 -> 27
 
-num = float(input())
+num = float(input("Введите вещественное число"))
 print(num," -> ")
 count = len(str(num))
 num = int(num * 10 ** count)
