@@ -11,7 +11,13 @@
 # out
 # 8.988
 
-numberInput = int(input("Enter a real number: "))
-reqAcc = int(input("Enter the required accuracy: '0.0001'"))
+from decimal import Decimal
 
-def 
+numberInput = (input("Enter a real number: "))
+reqAcc = (input("Enter the required accuracy '0.0001': "))
+
+def ToAcc(numberInput, reqAcc):
+    num = Decimal
+    return num(numberInput).quantize(num(reqAcc))
+
+print(ToAcc(numberInput, reqAcc))
