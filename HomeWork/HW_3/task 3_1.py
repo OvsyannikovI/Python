@@ -21,6 +21,7 @@ def createList(num):
     return my_list
 
 arr = createList(count)
+
 print(arr)
 sum = 0
 for i in range(0, len(arr)):
