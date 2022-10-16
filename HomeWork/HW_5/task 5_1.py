@@ -11,19 +11,19 @@
 
 from random import sample
 
-def list_rnd_words(count: int, alp: s = "абв"):
-    words_list = []
+def list_rand_words(count, alp: str = "абв"):
+    word_list = []
     for i in range(count):
-        letters = samle(alp,3)
-        words_list.append("".join(letters))
-    return " ".join(words_list)
+        letters = sample(alp, 3)
+        word_list.append("".join(letters))
+    return " ".join(word_list)
 
-def list_rnd_word(count: int, apl: str = "абв"):
-    return " ".join(sample(apl, 3)) for _ in range(count)
+num =int(input("Count :"))
 
-def simple_sentence(words: str) -> str:
-    return " ".join(words.replace("абв", "").split())
+first_str = list_rand_words(num)
 
-all_list = list_rand_words(int(input("Number of  words: ")))
-print(all_list)
-print(simple_sentence(all_list))
+print(first_str)
+
+def replace(my_str: str):
+   return " ".join(my_str.replace("абв", "").split())
+print(replace(first_str))
