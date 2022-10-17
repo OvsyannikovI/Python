@@ -14,7 +14,6 @@
 # out
 # [28, 20, 10, 5, 1, 24, 7, 15, 23, 25]
 # [24, 15, 23, 25]
-from operator import index
 import random
 
 count = int(input("In : "))
