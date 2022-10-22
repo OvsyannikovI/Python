@@ -7,7 +7,7 @@ def main_menu():
     print("Mini Calc")
     print('-' * 20)
     j = 1
-    for i in op.actions.keys():
+    for i in op.actions_float.keys():
         print(f"{j} --- '{i}'")
         j += 1
     print("6 --- exit")

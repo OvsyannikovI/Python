@@ -1,7 +1,15 @@
 global x
 global y
 
-actions = {
+actions_complex = {
+    "^": lambda x,y: str(complex(x)**complex(y)),
+    "*": lambda x,y: str(complex(x)*complex(y)),
+    "/": lambda x,y: str(complex(x)/complex(y)),
+    "+": lambda x,y: str(complex(x)+complex(y)),
+    "-": lambda x,y: str(complex(x)-complex(y)),
+}
+
+actions_float = {
     "^": lambda x,y: str(float(x)**float(y)),
     "*": lambda x,y: str(float(x)*float(y)),
     "/": lambda x,y: str(float(x)/float(y)),
