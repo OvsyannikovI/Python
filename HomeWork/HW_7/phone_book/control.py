@@ -1,4 +1,6 @@
 import user_interface as ui
+import read_book as read
+import add_contact as add
 
 def get_value():
     return int(input('Enter number = '))
@@ -10,15 +12,16 @@ def select_item():
 
 def control_main_menu(num: int):
     if str(num) in ui.menu_1:
-        print("start")
+        if num == 3:
+            exit()
+        elif num == 2:
+            add.add_contact()
+        elif num == 1:
+            read.read_book()
     else:
         print("Error menu  --> ", num)
 
-def add_contact():
-    return print("")
 
-def read_book():
-    return print("")
 
 def job_phone_book():
     control_main_menu(select_item())
