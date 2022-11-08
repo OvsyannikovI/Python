@@ -9,28 +9,43 @@ from telegram.ext import (
 
 
 # Определяем константы этапов разговора
-CHOISE, PLAY, NEXT = range(3)
+CHOICE = 0
 board = list(map(str, range(1, 10)))
 counter = 0
 
 # функция обратного вызова точки входа в разговор
 def start(update, _):
     update.message.reply_text(draw_board())
-    update.message.reply_text("Играем в крестики-нолики?\n1 - Game\n0 - Exit")
-    return CHOISE
+    update.message.reply_text(f"Играем в крестики-нолики?\nПервый ход {chr(10060)}")
+    return CHOICE
 
 
-def choise(update, _):
-    # user = update.message.from_user
-    user_choise = update.message.text
-    if user_choise in "1 0":
-        if user_choise == "0":
-            return cancel
-        elif user_choise == "1":
-            return PLAY
+def choice(update, _):
+    global counter, board
+    answer = update.message.text 
+    rez = ""
+    if int(answer) in range(1, 10):
+        answer = int(answer)
+        pos = board[answer - 1]
+        if pos not in (chr(10060), chr(11093)):
+            board[answer - 1] = chr(10060) if whatistoken(counter) == "X" else chr(11093)
+            if counter > 3:
+                if check_win():
+                    update.message.reply_text(draw_board())
+                    update.message.reply_text(f"{check_win()} - WIN{chr(127942)}{chr(127881)}!")
+                    return ConversationHandler.END
+            if counter == 8:
+                update.message.reply_text(draw_board())
+                update.message.reply_text(f"Drawn game {chr(129318)}{chr(129309)}!")
+                return ConversationHandler.END
+            update.message.reply_text(draw_board() + f"{counter}")
+            counter += 1     
+        else:
+            update.message.reply_text(f"This cell is already occupied{chr(9995)}{chr(129292)}")
+            update.message.reply_text(draw_board())
     else:
-        update.message.reply_text("You" + user_choise)
-        return cancel
+        update.message.reply_text( f"Incorrect input{chr(9940)}. Are you sure you entered a correct number?")
+        update.message.reply_text(draw_board())
 
 
 def draw_board():
@@ -43,56 +58,11 @@ def draw_board():
         str_line += f"\n{'-' * 20}"
     return str_line
 
-
-def place_sign(token, answer):
-    global board
-    rez = ""
-    if int(answer) in range(1, 10):
-        answer = int(answer)
-        pos = board[answer - 1]
-        if pos not in (chr(10060), chr(11093)):
-            board[answer - 1] = chr(10060) if token == "X" else chr(11093)
-        else:
-            rez = f"This cell is already occupied{chr(9995)}{chr(129292)}"
-            return rez
-    else:
-        rez = f"Incorrect input{chr(9940)}. Are you sure you entered a correct number?"
-        return rez
-
-
 def whatistoken(counter):
     if counter % 2:
         return "O"
     else:
         return "X"
-
-
-def play(update, _):
-    global counter
-    update.message.reply_text("старт play")
-    update.message.reply_text(draw_board())
-    answer = update.message.text
-    update.message.reply_text(
-        f"Enter a number from 1 to 9.\nSelect a position {whatistoken(counter)}? \n ввод - {answer}; counter - {counter}"
-    )
-    place_sign(whatistoken(counter), answer)
-    update.message.reply_text(draw_board())        
-    counter += 1
-    return NEXT
-
-def next(update, _):
-    global counter
-    if counter > 3:
-        if check_win():
-            update.message.reply_text(
-                f"{check_win()} - WIN{chr(127942)}{chr(127881)}!"
-            )
-            return cancel
-        if counter == 8:
-            update.message.reply_text(f"Drawn game {chr(129318)}{chr(129309)}!")
-            return cancel
-    return PLAY
-
 
 def check_win():
     win_coord = (
@@ -110,13 +80,8 @@ def check_win():
 
 
 def cancel(update, _):
-    # определяем пользователя
-    user = update.message.from_user
     # Отвечаем на отказ поговорить
-    update.message.reply_text(
-        "Мое дело предложить - Ваше отказаться" " Будет скучно - пиши.",
-        reply_markup=ReplyKeyboardRemove(),
-    )
+    update.message.reply_text("End.", reply_markup=ReplyKeyboardRemove())
     # Заканчиваем разговор.
     return ConversationHandler.END
 
@@ -132,9 +97,7 @@ if __name__ == "__main__":
         entry_points=[CommandHandler("start", start)],
         # этапы разговора, каждый со своим списком обработчиков сообщений
         states={
-            CHOISE: [MessageHandler(Filters.text, choise)],
-            PLAY: [MessageHandler(Filters.text, play)],
-            NEXT: [MessageHandler(Filters.text, next)],
+            CHOICE: [MessageHandler(Filters.text, choice)],
         },
         # точка выхода из разговора
         fallbacks=[CommandHandler("cancel", cancel)],
