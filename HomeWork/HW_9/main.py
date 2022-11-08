@@ -1,5 +1,4 @@
-from telegram import ReplyKeyboardRemove
-from info import token
+from telegram import ReplyKeyboardMarkup, ReplyKeyboardRemove, Update
 from telegram.ext import (
     Updater,
     CommandHandler,
@@ -8,84 +7,105 @@ from telegram.ext import (
     ConversationHandler,
 )
 
+
 # Определяем константы этапов разговора
-fld = list(range(1, 10))
-x = chr(10060)
-o = chr(11093)
-count = 9
-player = x
 CHOICE = 0
-
-
-def show_field(field):
-    txt = ''
-    for i in range(len(field)):
-        if not i % 3:
-            txt += f'\n{"-" * 25}\n'
-        txt += f'{field[i]:^8}'
-    txt += f"\n{'-' * 25}"
-    return txt
-
-
-def check_win(field):
-    win_coord = ((0, 1, 2), (3, 4, 5), (6, 7, 8), (0, 3, 6), (1, 4, 7), (2, 5, 8), (0, 4, 8), (2, 4, 6))
-    n = [field[x[0]] for x in win_coord if field[x[0]] == field[x[1]] == field[x[2]]]
-    return n[0] if n else n
-
+board = list(map(str, range(1, 10)))
+counter = 0
 
 # функция обратного вызова точки входа в разговор
 def start(update, _):
-    global fld, player, count
-    fld = list(range(1, 10))
-    count = 9
-    player = x
-    update.message.reply_text("Hi, let's play tic-tac-toe")
-    update.message.reply_text(show_field(fld))
-    update.message.reply_text(f'Go first {chr(10060)}')
+    update.message.reply_text(draw_board())
+    update.message.reply_text(f"Играем в крестики-нолики?\nПервый ход {chr(10060)}")
     return CHOICE
 
 
 def choice(update, _):
-    global player, count
-    move = update.message.text
-    move = int(move)
-    if move not in fld:
-        update.message.reply_text(f"Incorrect input{chr(9940)}\nTry again")
+    global counter, board
+    answer = update.message.text 
+    rez = ""
+    if int(answer) in range(1, 10):
+        answer = int(answer)
+        pos = board[answer - 1]
+        if pos not in (chr(10060), chr(11093)):
+            board[answer - 1] = chr(10060) if whatistoken(counter) == "X" else chr(11093)
+            if counter > 3:
+                if check_win():
+                    update.message.reply_text(draw_board())
+                    update.message.reply_text(f"{check_win()} - WIN{chr(127942)}{chr(127881)}!")
+                    return ConversationHandler.END
+            if counter == 8:
+                update.message.reply_text(draw_board())
+                update.message.reply_text(f"Drawn game {chr(129318)}{chr(129309)}!")
+                return ConversationHandler.END
+            update.message.reply_text(draw_board() + f"{counter}")
+            counter += 1     
+        else:
+            update.message.reply_text(f"This cell is already occupied{chr(9995)}{chr(129292)}")
+            update.message.reply_text(draw_board())
     else:
-        fld.insert(fld.index(move), player)
-        fld.remove(move)
-        update.message.reply_text(show_field(fld))
-        if check_win(fld):
-            update.message.reply_text(f"{player} - CHAMPION{chr(127942)}{chr(127881)}")
-            return ConversationHandler.END
-        player = o if player == x else x
-        count -= 1
+        update.message.reply_text( f"Incorrect input{chr(9940)}. Are you sure you entered a correct number?")
+        update.message.reply_text(draw_board())
 
-    if count == 0:
-        update.message.reply_text(f"Draw {chr(129309)}")
-        return ConversationHandler.END
+
+def draw_board():
+    str_line = ""
+    str_line += "-" * 20
+    for i in range(3):
+        str_line += "\n"
+        for k in range(3):
+            str_line += " ".join(board[k + i * 3]) + " " * 12
+        str_line += f"\n{'-' * 20}"
+    return str_line
+
+def whatistoken(counter):
+    if counter % 2:
+        return "O"
+    else:
+        return "X"
+
+def check_win():
+    win_coord = (
+        (0, 1, 2),
+        (3, 4, 5),
+        (6, 7, 8),
+        (0, 3, 6),
+        (1, 4, 7),
+        (2, 5, 8),
+        (0, 4, 8),
+        (2, 4, 6),
+    )
+    n = [board[x[0]] for x in win_coord if board[x[0]] == board[x[1]] == board[x[2]]]
+    return n[0] if n else n
 
 
 def cancel(update, _):
-    update.message.reply_text('Bye', reply_markup=ReplyKeyboardRemove())
+    # Отвечаем на отказ поговорить
+    update.message.reply_text("End.", reply_markup=ReplyKeyboardRemove())
+    # Заканчиваем разговор.
     return ConversationHandler.END
 
 
-if __name__ == '__main__':
-    updater = Updater(token)
+if __name__ == "__main__":
+    updater = Updater("5673776766:AAFYbvEnMEYV30iuxhnZJF7tuJFEJzY0EXk")
+    # получаем диспетчера для регистрации обработчиков
     dispatcher = updater.dispatcher
 
-    conv_handler = ConversationHandler(
-        entry_points=[CommandHandler('start', start)],
+    # Определяем обработчик разговоров `ConversationHandler`
+    conv_handler = ConversationHandler(  # здесь строится логика разговора
+        # точка входа в разговор
+        entry_points=[CommandHandler("start", start)],
+        # этапы разговора, каждый со своим списком обработчиков сообщений
         states={
-            CHOICE: [MessageHandler(Filters.text, choice)]
+            CHOICE: [MessageHandler(Filters.text, choice)],
         },
-        fallbacks=[CommandHandler('cancel', cancel)]
+        # точка выхода из разговора
+        fallbacks=[CommandHandler("cancel", cancel)],
     )
 
+    # Добавляем обработчик разговоров `conv_handler`
     dispatcher.add_handler(conv_handler)
 
-    print('server start')
-
+    # Запуск бота
     updater.start_polling()
     updater.idle()
